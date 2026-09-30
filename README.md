@@ -47,13 +47,17 @@ En local, sans `.env`, le mode développement est actif. Ne pas utiliser `runser
 La configuration vise **https://mesphotosdefamille.pythonanywhere.com/**.
 Ce dépôt ne déploie rien automatiquement.
 
+La base est déjà configurée en **SQLite**, disponible aussi sur les comptes gratuits de PythonAnywhere. `python manage.py migrate` crée `db.sqlite3`, qui contient les comptes, catégories et légendes ; les images restent dans `media/`. Aucun serveur MySQL ou PostgreSQL n’est nécessaire. Ce choix convient à un petit album familial avec peu d’écritures simultanées.
+Voir les [bases disponibles sur PythonAnywhere](https://help.pythonanywhere.com/pages/KindsOfDatabases/).
+
 1. Copier le projet dans `/home/mesphotosdefamille/mesphotosdefamille`.
 2. Dans une console Bash PythonAnywhere, choisir une version de Python disponible, identique à celle de la Web app. Exemple avec Python 3.13 :
 
    ```bash
    cd /home/mesphotosdefamille/mesphotosdefamille
    mkvirtualenv --python=/usr/bin/python3.13 mesphotosdefamille
-   pip install -r requirements.txt
+   python -m pip install -r requirements.txt
+   python -m pip check
    cp .env.example .env
    python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
    ```
@@ -85,6 +89,25 @@ Le quota disque de l’hébergement reste à surveiller : la conversion réduit 
 
 Guides officiels : [déploiement Django](https://help.pythonanywhere.com/pages/DeployExistingDjangoProject/), [fichiers statiques](https://help.pythonanywhere.com/pages/DjangoStaticFiles/).
 La configuration des photos privées ci-dessus remplace la correspondance publique habituelle des fichiers média.
+
+### Si pip signale un conflit entre MoviePy et Pillow
+
+Ce site n’utilise pas MoviePy. Ce message indique que l’environnement d’installation contient aussi des packages extérieurs au projet, par exemple les packages préinstallés de PythonAnywhere. Utiliser un environnement réservé au site pour isoler ses dépendances.
+
+Dans une console Bash, créer un nouvel environnement. L’exemple utilise Python 3.13 : remplacer cette version par celle affichée dans l’onglet **Web** si nécessaire.
+
+```bash
+cd /home/mesphotosdefamille/mesphotosdefamille
+mkvirtualenv mesphotosdefamille-web --python=/usr/bin/python3.13
+python -m pip install -r requirements.txt
+python -m pip check
+```
+
+`mkvirtualenv` active automatiquement le nouvel environnement. Pour le réactiver dans une autre console : `workon mesphotosdefamille-web`.
+`python -m pip check` doit afficher `No broken requirements found.`
+
+Dans **Web → Virtualenv**, indiquer `/home/mesphotosdefamille/.virtualenvs/mesphotosdefamille-web`, puis cliquer sur **Reload**.
+Installer les dépendances sans `--user` et sans `--system-site-packages`. Conserver les versions de `requirements.txt` : aucune mise à jour de MoviePy n’est nécessaire pour ce site.
 
 ## Sauvegarder les souvenirs
 
