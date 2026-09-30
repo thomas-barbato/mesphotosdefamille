@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Modifier un souvenir{% endblock %}
+{% block content %}
+<main id="main" class="edit-main">
+  <a class="back-link" href="{% url 'gallery' %}">← Retour à la galerie</a>
+  {% if messages %}{% for message in messages %}<p class="message {{ message.tags }}" role="status">{{ message }}</p>{% endfor %}{% endif %}
+  <div class="edit-layout">
+    <div class="edit-photo"><img src="{% url 'photo-file' photo.pk 'grande' %}" alt="{{ photo.caption|default:'Photo à modifier' }}"></div>
+    <section class="edit-form"><span class="eyebrow">LES MOTS QUI RESTENT</span><h1>Chaque photo<br>a son <em>histoire.</em></h1><p class="muted">Ajoutez une légende ou changez sa catégorie.</p>
+      <form method="post">{% csrf_token %}{{ form.as_p }}<button class="button button-primary button-full"><svg class="icon"><use href="#i-check"/></svg>Enregistrer les modifications</button></form>
+      <details class="delete-zone"><summary>Supprimer cette photo</summary><p>Cette action supprimera définitivement la photo de l’album.</p><form method="post" action="{% url 'photo-delete' photo.pk %}">{% csrf_token %}<button class="button button-danger">Supprimer définitivement</button></form></details>
+    </section>
+  </div>
+</main>
+{% endblock %}

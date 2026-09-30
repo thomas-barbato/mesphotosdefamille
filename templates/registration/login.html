@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Bienvenue à la maison{% endblock %}
+{% block body_class %}login-page{% endblock %}
+{% block content %}
+<main id="main" class="login-main">
+  <section class="login-story">
+    <span class="eyebrow"><span class="little-line"></span> LES SOUVENIRS NOUS RASSEMBLENT</span>
+    <h1>Un petit coin<br>pour notre<br> <em>grande histoire.</em></h1>
+    <p>Des moments tout simples aux jours inoubliables.<br>Bienvenue dans notre album de famille.</p>
+    <div class="login-keepsake" aria-hidden="true"><span class="keepsake-flower"><svg><use href="#i-flower"/></svg></span><span class="handwriting">Les belles choses<br>se gardent ensemble.</span><span class="keepsake-date">NOTRE ALBUM · DEPUIS AUJOURD’HUI</span></div>
+    <span class="login-note"><svg class="icon"><use href="#i-lock"/></svg> Un espace rien qu’à nous.</span>
+  </section>
+  <section class="login-panel" aria-labelledby="login-title">
+    <span class="eyebrow">BIENVENUE À LA MAISON</span>
+    <h2 id="login-title">Heureux de<br> vous <em>retrouver.</em></h2>
+    <p class="muted">Connectez-vous pour ouvrir l’album.</p>
+    {% if messages %}{% for message in messages %}<p class="message error" role="alert">{{ message }}</p>{% endfor %}{% endif %}
+    {% if form.errors %}<p class="message error" role="alert">L’identifiant ou le mot de passe est incorrect.</p>{% endif %}
+    <form method="post" action="{% url 'login' %}">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <label for="id_username">Votre identifiant</label><input type="text" id="id_username" name="username" autocomplete="username" required autofocus maxlength="150" placeholder="Votre nom d’utilisateur">
+      <div class="password-label"><label for="id_password">Votre mot de passe</label><button type="button" class="text-button" data-toggle-password="id_password" aria-pressed="false">Afficher</button></div>
+      <input type="password" id="id_password" name="password" autocomplete="current-password" required placeholder="Votre mot de passe">
+      <button type="submit" class="button button-primary button-full">Ouvrir notre album <svg class="icon"><use href="#i-arrow"/></svg></button>
+    </form>
+    <p class="login-help">Besoin d’un accès ou d’un nouveau mot de passe ?<br>Demandez à l’administrateur de la famille.</p>
+    <span class="login-private"><svg class="icon"><use href="#i-lock"/></svg> Vos photos restent entre nous.</span>
+  </section>
+</main>
+{% endblock %}

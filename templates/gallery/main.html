@@ -1,0 +1,59 @@
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow"><span class="little-line"></span> NOTRE ALBUM DE FAMILLE</div>
+    <h1>Les petits moments.<br>Les <em>grands souvenirs.</em></h1>
+    <p>Les jours de fête, les escapades, les instants de rien.<br>Tout ce qu’on aime retrouver, au même endroit.</p>
+    <button class="button button-primary" data-dialog="upload-dialog"><svg class="icon"><use href="#i-plus"/></svg> Ajouter des photos <svg class="icon button-arrow"><use href="#i-arrow"/></svg></button>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="orbit"></div>
+    <div class="memory-card memory-back"><div class="sunset-art"><span class="sun"></span><span class="hill hill-back"></span><span class="hill hill-front"></span></div><span class="handwriting">nos échappées belles</span></div>
+    <div class="memory-card memory-front"><div class="flower-art"><svg viewBox="0 0 160 150"><path class="stem" d="M78 150c2-36 2-59 6-91m-6 67c-21-2-32-16-34-25 24 1 31 14 34 25m3-23c17-3 27-13 28-22-22 0-26 13-28 22"/><g class="flower-petals"><ellipse cx="84" cy="34" rx="11" ry="19"/><ellipse cx="84" cy="73" rx="11" ry="19"/><ellipse cx="63" cy="53" rx="19" ry="11"/><ellipse cx="105" cy="53" rx="19" ry="11"/><ellipse cx="70" cy="39" rx="10" ry="16" transform="rotate(-45 70 39)"/><ellipse cx="99" cy="39" rx="10" ry="16" transform="rotate(45 99 39)"/><ellipse cx="70" cy="68" rx="10" ry="16" transform="rotate(45 70 68)"/><ellipse cx="99" cy="68" rx="10" ry="16" transform="rotate(-45 99 68)"/></g><circle cx="84" cy="53" r="14" fill="#b56e39"/></svg></div><span class="handwriting">le bonheur est là.</span></div>
+    <span class="art-spark spark-one">✳</span><span class="art-spark spark-two">+</span>
+    <span class="art-note">Pour aujourd’hui.<br>Et pour plus tard.</span>
+  </div>
+</section>
+{% if messages %}<div class="messages" aria-live="polite">{% for message in messages %}<p class="message {{ message.tags }}"><svg class="icon"><use href="{% if message.tags == 'error' %}#i-close{% else %}#i-check{% endif %}"/></svg>{{ message }}</p>{% endfor %}</div>{% endif %}
+<section class="album" aria-labelledby="album-title">
+  <div class="album-heading">
+    <div><span class="eyebrow">LA COLLECTION</span><h2 id="album-title">{% if current_category %}{{ current_category.name }}{% else %}Tous nos souvenirs{% endif %}<span class="photo-count">{{ page_obj.paginator.count }}</span></h2></div>
+    <form class="search-form" action="{% url 'gallery' %}" method="get" role="search" data-search>
+      {% if current_category %}<input type="hidden" name="categorie" value="{{ current_category.pk }}">{% endif %}
+      <label class="visually-hidden" for="search-input">Rechercher dans les légendes</label><svg class="icon"><use href="#i-search"/></svg>
+      <input id="search-input" name="q" type="search" placeholder="Retrouver un souvenir…" value="{{ query }}" maxlength="100">
+      <button class="icon-button" aria-label="Rechercher"><svg class="icon"><use href="#i-arrow"/></svg></button>
+    </form>
+  </div>
+  <div class="collection-toolbar">
+    <nav class="category-list" aria-label="Filtrer par catégorie">
+      <a class="category-pill {% if not current_category %}active{% endif %}" href="{% url 'gallery' %}" data-gallery {% if not current_category %}aria-current="page"{% endif %}><svg class="icon"><use href="#i-photo"/></svg>Tout voir <span>{{ totals.count }}</span></a>
+      {% for category in categories %}<a class="category-pill {% if category.pk == current_category.pk %}active{% endif %}" href="{% url 'gallery' %}?categorie={{ category.pk }}" data-gallery {% if category.pk == current_category.pk %}aria-current="page"{% endif %}>{{ category.name }} <span>{{ category.photo_count }}</span></a>{% endfor %}
+      <button class="category-pill category-add" data-dialog="category-dialog"><svg class="icon"><use href="#i-plus"/></svg>Créer une catégorie</button>
+    </nav>
+    <span class="sort-note">Les plus récents d’abord</span>
+  </div>
+  {% if query %}<p class="search-summary">{{ page_obj.paginator.count }} résultat{{ page_obj.paginator.count|pluralize }} pour « {{ query }} » <a href="{% url 'gallery' %}{% if current_category %}?categorie={{ current_category.pk }}{% endif %}" data-gallery>Effacer la recherche</a></p>{% endif %}
+  {% if page_obj.object_list %}
+    <div class="photo-grid">
+      {% for photo in page_obj %}
+        <figure class="photo-card">
+          <a class="photo-link" href="{% url 'photo-file' photo.pk 'grande' %}" data-photo data-caption="{{ photo.caption|default:'Un souvenir à garder' }}" data-category="{{ photo.category.name|default:'Sans catégorie' }}" data-meta="Ajoutée par {{ photo.owner.get_short_name|default:photo.owner.username }} · {{ photo.created_at|date:'j F Y' }}" {% if photo.owner_id == user.pk or user.is_staff %}data-edit="{% url 'photo-edit' photo.pk %}"{% endif %} aria-label="Voir en grand : {{ photo.caption|default:'photo sans légende' }}">
+            <img src="{% url 'photo-file' photo.pk 'miniature' %}" alt="{{ photo.caption|default:'Photo de famille sans légende' }}" width="{{ photo.width }}" height="{{ photo.height }}" loading="lazy" decoding="async">
+            <span class="photo-expand"><svg class="icon"><use href="#i-plus"/></svg></span>
+          </a>
+          <figcaption><span class="photo-category">{{ photo.category.name|default:'PETITS INSTANTS' }}</span><p>{{ photo.caption|default:'Un souvenir à garder' }}</p><span class="photo-date">{{ photo.created_at|date:'j F Y' }}</span></figcaption>
+        </figure>
+      {% endfor %}
+    </div>
+    {% if page_obj.has_other_pages %}<nav class="pagination" aria-label="Pages de la galerie">{% if page_obj.has_previous %}<a class="button button-secondary" href="?{{ page_query }}&amp;page={{ page_obj.previous_page_number }}" data-gallery>Page précédente</a>{% endif %}<span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="button button-secondary" href="?{{ page_query }}&amp;page={{ page_obj.next_page_number }}" data-gallery>Page suivante</a>{% endif %}</nav>{% endif %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon"><svg class="icon"><use href="#i-photo"/></svg><span>+</span></div>
+      <span class="eyebrow">{% if query %}ON CHERCHE ENCORE{% elif current_category %}UNE NOUVELLE HISTOIRE{% else %}TOUT COMMENCE ICI{% endif %}</span>
+      <h3>{% if query %}Ce souvenir se fait discret.{% elif current_category %}Une catégorie, mille possibilités.{% else %}Votre premier souvenir<br>n’attend que vous.{% endif %}</h3>
+      <p>{% if query %}Essayez quelques autres mots dans les légendes.{% elif current_category %}Ajoutez les premières photos de cette catégorie.{% else %}Une photo, quelques mots, et l’album commence à vivre.<br>Les plus beaux moments méritent une petite place ici.{% endif %}</p>
+      {% if query %}<a class="button button-secondary" href="{% url 'gallery' %}{% if current_category %}?categorie={{ current_category.pk }}{% endif %}" data-gallery>Voir les souvenirs</a>{% else %}<button class="button button-primary" data-dialog="upload-dialog"><svg class="icon"><use href="#i-plus"/></svg>Ajouter {% if totals.count %}des photos{% else %}mes premières photos{% endif %}</button>{% endif %}
+    </div>
+  {% endif %}
+  <div class="album-bottom"><span><span class="status-dot"></span>{{ totals.count }} souvenir{{ totals.count|pluralize }} à garder{% if totals.size %} · {{ totals.size|filesizeformat }}{% endif %}</span><span><svg class="icon"><use href="#i-lock"/></svg> Un album privé, partagé en famille.</span></div>
+</section>

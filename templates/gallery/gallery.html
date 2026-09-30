@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<main id="main" class="gallery-main">
+  {% include 'gallery/main.html' %}
+</main>
+<dialog id="upload-dialog" class="form-dialog" aria-labelledby="upload-title">
+  <button type="button" class="icon-button dialog-close" data-close aria-label="Fermer"><svg class="icon"><use href="#i-close"/></svg></button>
+  <span class="eyebrow">UN SOUVENIR DE PLUS</span>
+  <h2 id="upload-title">Faites une place<br>à vos <em>photos.</em></h2>
+  <p class="muted">Un petit moment à partager, une histoire à garder.</p>
+  <form action="{% url 'upload' %}" method="post" enctype="multipart/form-data" data-async="upload">{% csrf_token %}
+    <div class="form-errors" role="alert" hidden></div>
+    <label class="drop-zone" id="drop-zone" for="{{ upload_form.photos.id_for_label }}">
+      <span class="upload-icon"><svg class="icon"><use href="#i-upload"/></svg></span>
+      <strong>Choisir mes photos</strong>
+      <span>ou les glisser ici</span>
+      <small>JPEG, PNG ou WebP · 20 Mo par photo · 12 à la fois</small>
+      {{ upload_form.photos }}
+    </label>
+    <ul id="selected-files" class="selected-files" aria-live="polite"></ul>
+    <label for="{{ upload_form.caption.id_for_label }}">Une légende <span class="optional">(facultatif)</span></label>
+    {{ upload_form.caption }}
+    <label for="{{ upload_form.category.id_for_label }}">Dans quelle catégorie ?</label>
+    {{ upload_form.category }}
+    <p class="form-help">Plusieurs photos ? Elles partageront cette légende et cette catégorie. Vous pourrez les modifier ensuite.</p>
+    <button class="button button-primary button-full" type="submit"><svg class="icon"><use href="#i-plus"/></svg><span>Ajouter à la galerie</span></button>
+    <p class="upload-progress muted" hidden role="status">Envoi et préparation des photos…</p>
+  </form>
+</dialog>
+<dialog id="category-dialog" class="form-dialog small-dialog" aria-labelledby="category-title">
+  <button type="button" class="icon-button dialog-close" data-close aria-label="Fermer"><svg class="icon"><use href="#i-close"/></svg></button>
+  <span class="eyebrow">CHAQUE SOUVENIR A SA PLACE</span>
+  <h2 id="category-title">Une nouvelle<br><em>catégorie.</em></h2>
+  <p class="muted">Regroupez les photos qui racontent la même histoire.</p>
+  <form action="{% url 'category-create' %}" method="post" data-async="category">{% csrf_token %}
+    <div class="form-errors" role="alert" hidden></div>
+    <label for="{{ category_form.name.id_for_label }}">Nom de la catégorie</label>
+    {{ category_form.name }}
+    <button class="button button-primary button-full" type="submit"><svg class="icon"><use href="#i-plus"/></svg><span>Créer la catégorie</span></button>
+  </form>
+</dialog>
+<dialog id="photo-dialog" class="lightbox" aria-label="Photo en grand">
+  <button class="lightbox-close icon-button" type="button" data-close aria-label="Fermer la photo"><svg class="icon"><use href="#i-close"/></svg></button>
+  <button class="lightbox-prev icon-button" type="button" data-direction="-1" aria-label="Photo précédente"><svg class="icon"><use href="#i-arrow"/></svg></button>
+  <div class="lightbox-content">
+    <img id="large-photo" alt="">
+    <div class="lightbox-caption"><div><span id="large-category" class="eyebrow"></span><p id="large-caption"></p><small id="large-meta"></small></div><a id="large-edit" class="button button-light" href="#"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a></div>
+    <p class="lightbox-error" role="alert" hidden>La photo n’a pas pu être chargée. Fermez-la puis réessayez.</p>
+  </div>
+  <button class="lightbox-next icon-button" type="button" data-direction="1" aria-label="Photo suivante"><svg class="icon"><use href="#i-arrow"/></svg></button>
+</dialog>
+<noscript><style>.form-dialog:not([open]){display:block;position:static;margin:2rem auto}.form-dialog .dialog-close{display:none}[data-dialog]{display:none}</style><p class="noscript-note">Vous pouvez ajouter vos photos et catégories dans les formulaires ci-dessous. Cliquez sur une photo pour la voir en grand.</p></noscript>
+{% endblock %}
