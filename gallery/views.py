@@ -24,11 +24,17 @@ class PrivateLoginView(LoginView):
     template_name = "registration/login.html"
     redirect_authenticated_user = True
 
+    def get(self, request, *args, **kwargs):
+        if "next" in request.GET:
+            return redirect("login")
+        return super().get(request, *args, **kwargs)
+
+    def get_redirect_url(self):
+        return ""
+
     def form_invalid(self, form):
         messages.error(self.request, "L’identifiant ou le mot de passe est incorrect.")
-        url = reverse("login")
-        next_url = self.get_redirect_url()
-        return redirect(f"{url}?{urlencode({'next': next_url})}" if next_url else url)
+        return redirect("login")
 
 
 def is_async(request):
@@ -40,7 +46,7 @@ def gallery_url(category=None):
     return f"{url}?{urlencode({'categorie': category.pk})}" if category else url
 
 
-@login_required
+@login_required(redirect_field_name=None)
 @never_cache
 @require_GET
 def gallery(request):
@@ -69,7 +75,7 @@ def gallery(request):
     })
 
 
-@login_required
+@login_required(redirect_field_name=None)
 @require_POST
 def upload(request):
     form = UploadForm(request.POST, request.FILES)
@@ -105,7 +111,7 @@ def upload(request):
     return JsonResponse({"url": url}) if is_async(request) else redirect(url)
 
 
-@login_required
+@login_required(redirect_field_name=None)
 @require_POST
 def create_category(request):
     form = CategoryForm(request.POST)
@@ -131,7 +137,7 @@ def form_error(request, form):
     return redirect("gallery")
 
 
-@login_required
+@login_required(redirect_field_name=None)
 @never_cache
 @require_GET
 def photo_file(request, pk, variant):
@@ -153,7 +159,7 @@ def editable_photo(request, pk):
     return get_object_or_404(photos, pk=pk)
 
 
-@login_required
+@login_required(redirect_field_name=None)
 @never_cache
 def edit_photo(request, pk):
     photo = editable_photo(request, pk)
@@ -170,7 +176,7 @@ def edit_photo(request, pk):
     return render(request, "gallery/edit.html", {"photo": photo, "form": form})
 
 
-@login_required
+@login_required(redirect_field_name=None)
 @require_POST
 def delete_photo(request, pk):
     photo = editable_photo(request, pk)

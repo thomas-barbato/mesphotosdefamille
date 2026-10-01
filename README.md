@@ -6,6 +6,7 @@ SQLite, HTML, CSS et JavaScript natif : aucun npm, framework frontend ou service
 ## Fonctionnalités
 
 - Connexion obligatoire, y compris pour accéder directement aux fichiers des photos.
+- Les visiteurs déconnectés arrivent sur `/connexion/`, sans chemin de photo dans l’adresse. Les anciens liens avec `?next=…` sont également nettoyés. Après connexion, retour à la galerie.
 - Comptes créés par l’administrateur dans `/admin/`, sans inscription publique.
 - Album commun aux utilisateurs connectés, catégories et recherche dans les légendes.
 - Envoi de 1 à 12 photos avec aperçu, glisser-déposer, légende et catégorie facultatives.

@@ -49,8 +49,36 @@ class GalleryTests(TestCase):
                     reverse("photo-file", args=[photo.pk, "miniature"]),
                     reverse("photo-edit", args=[photo.pk])]:
             with self.subTest(url=url):
-                self.assertRedirects(self.client.get(url), f"{reverse('login')}?next={url}")
+                self.assertRedirects(self.client.get(url), reverse("login"))
+        self.assertRedirects(self.client.get(reverse("photo-file", args=[999999, "grande"])), reverse("login"))
+        for url in [reverse("upload"), reverse("category-create"), reverse("photo-delete", args=[photo.pk])]:
+            with self.subTest(url=url):
+                self.assertRedirects(self.client.post(url, {}), reverse("login"))
         self.assertEqual(self.client.get(f"/media/{photo.image.name}").status_code, 404)
+
+    def test_old_photo_login_links_redirect_to_clean_login(self):
+        self.upload()
+        photo = Photo.objects.get()
+        self.client.logout()
+        photo_url = reverse("photo-file", args=[photo.pk, "grande"])
+        response = self.client.get(reverse("login"), {"next": photo_url})
+        self.assertRedirects(response, reverse("login"))
+        login_page = self.client.get(response.url)
+        self.assertNotContains(login_page, photo_url)
+        self.assertNotContains(login_page, 'name="next"')
+        self.assertIn("no-store", response["Cache-Control"])
+
+    def test_login_always_returns_to_gallery_without_photo_next(self):
+        self.upload()
+        photo_url = reverse("photo-file", args=[Photo.objects.get().pk, "grande"])
+        self.client.logout()
+        data = {"username": "famille", "password": "wrong", "next": photo_url}
+        failed = self.client.post(reverse("login"), data)
+        self.assertRedirects(failed, reverse("login"))
+        self.assertEqual(self.client.get(failed.url).status_code, 200)
+        data["password"] = "NotreAlbum-2026!"
+        self.assertRedirects(self.client.post(reverse("login"), data), reverse("gallery"))
+        self.assertRedirects(self.client.get(reverse("login"), {"next": photo_url}), reverse("gallery"))
 
     def test_upload_converts_and_removes_metadata(self):
         exif = Image.Exif()
